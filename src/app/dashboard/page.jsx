@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/supabase/client";
 
 import PerfumeForm from "../components/PerfumeForm";
-// import PerfumeFormEdit from "@/components/PerfumeFormEdit";
-// import PerfumeTable from "@/components/PerfumeTable";
+import PerfumeFormEdit from "../components/PerfumeFormEdit";
+import PerfumeTable from "../components/PerfumeTable";
 
 import ExclusiveForm from "../components/ExclusiveForm";
 // import ExclusiveFormEdit from "@/components/ExclusiveFormEdit";
@@ -17,12 +17,15 @@ import DecantForm from "../components/DecantForm";
 // import DecantTable from "@/components/DecantTable";
 
 import MiniatureForm from "../components/MiniatureForm";
+import { getPerfumes } from "@/actions/perfumes";
 // import MiniatureFormEdit from "@/components/MiniatureFormEdit";
 // import MiniatureTable from "@/components/MiniatureTable";
 
 export default function Dashboard() {
     const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState("perfume");
+    const [selectedPerfume, setSelectedPerfume] = useState(null);
+    const [perfumes, setPerfumes] = useState([]);
 
     // Verificar la sesión del usuario al cargar el componente
     useEffect(() => {
@@ -35,7 +38,6 @@ export default function Dashboard() {
                 router.push("/login");
             }
         };
-
         checkUser();
     }, [router]);
 
@@ -43,6 +45,17 @@ export default function Dashboard() {
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.push("/");
+    };
+
+    // Recargar perfumes
+    const refreshPerfumes = async () => {
+        try {
+            const data = await getPerfumes();
+            setPerfumes(data); // Actualiza el estado de perfumes en PerfumeTable
+        } catch (error) {
+            console.error(error);
+            alert("Error al recargar los perfumes");
+        }
     };
 
     // Renderizar contenido según categoria seleccionada
@@ -54,8 +67,15 @@ export default function Dashboard() {
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
                         Edición
                     </h2>
-                    {/* <PerfumeFormEdit />
-                    <PerfumeTable /> */}
+                    <PerfumeFormEdit
+                        initialData={selectedPerfume}
+                        onRefresh={refreshPerfumes}
+                    />
+                    <PerfumeTable
+                        perfumes={perfumes}
+                        onEdit={setSelectedPerfume}
+                        onRefresh={refreshPerfumes}
+                    />
                 </>
             ),
             exclusivos: (
@@ -64,8 +84,8 @@ export default function Dashboard() {
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
                         Edición
                     </h2>
-                    {/* <ExclusiveFormEdit />
-                    <ExclusiveTable /> */}
+                    {/* {/* <ExclusiveFormEdit /> */}
+                    {/* <ExclusiveTable /> */}
                 </>
             ),
             miniaturas: (

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { updatePerfume } from "../../actions/perfumes";
 
-function PerfumeFormEdit({ initialData, onRefresh }) {
+function PerfumeFormEdit({ initialData, onUpdate }) {
     const [formData, setFormData] = useState(initialData || {});
     const [addingUpdate, setAddingUpdate] = useState(false);
 
@@ -47,8 +47,9 @@ function PerfumeFormEdit({ initialData, onRefresh }) {
         setAddingUpdate(true);
 
         try {
-            await updatePerfume(formData.id, formData); // Actualiza el perfume en la base de datos
-            onRefresh();
+            const updated = await updatePerfume(formData.id, formData);
+            // Se asume que updatePerfume retorna el registro actualizado.
+            onUpdate(updated);
             setFormData({});
         } catch (error) {
             console.error(error);

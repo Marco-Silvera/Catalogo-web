@@ -2,17 +2,14 @@
 import { deletePerfume } from "@/actions/perfumes";
 import Link from "next/link";
 
-function PerfumeRowDashboard({ perfume, onEdit, onRefresh }) {
+function PerfumeRowDashboard({ perfume, onEdit, onDelete }) {
     const handleDelete = async () => {
-        if (confirm("¿Estás seguro de eliminar este perfume?")) {
-            try {
-                await deletePerfume(perfume.id);
-                alert("Perfume eliminado exitosamente");
-                onRefresh(); // Actualiza la tabla
-            } catch (error) {
-                console.error(error);
-                alert("Error al eliminar el perfume");
-            }
+        try {
+            await deletePerfume(perfume.id);
+            onDelete(perfume.id); // Actualiza la tabla
+        } catch (error) {
+            console.error(error);
+            alert("Error al eliminar el perfume");
         }
     };
 

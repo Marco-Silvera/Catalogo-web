@@ -26,6 +26,7 @@ export default function Dashboard() {
     const [selectedCategory, setSelectedCategory] = useState("perfume");
     const [selectedPerfume, setSelectedPerfume] = useState(null);
     const [perfumes, setPerfumes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     // Verificar la sesión del usuario al cargar el componente
     useEffect(() => {
@@ -40,6 +41,39 @@ export default function Dashboard() {
         };
         checkUser();
     }, [router]);
+
+    // Cargar perfumes inicial
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getPerfumes();
+                setPerfumes(data);
+            } catch (error) {
+                console.error(error);
+                alert("Error al cargar los perfumes");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Funciones para actualizar el estado local
+    const handleAddPerfume = (newPerfume) => {
+        setPerfumes((prev) => [...prev, newPerfume]);
+    };
+
+    const handleUpdatePerfume = (updatedPerfume) => {
+        setPerfumes((prev) =>
+            prev.map((perfume) =>
+                perfume.id === updatedPerfume.id ? updatedPerfume : perfume
+            )
+        );
+    };
+
+    const handleDeletePerfume = (id) => {
+        setPerfumes((prev) => prev.filter((perfume) => perfume.id !== id));
+    };
 
     // Cerrar sesión
     const handleLogout = async () => {
@@ -63,18 +97,19 @@ export default function Dashboard() {
         const categories = {
             perfume: (
                 <>
-                    <PerfumeForm />
+                    <PerfumeForm onAdd={handleAddPerfume} />
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
                         Edición
                     </h2>
                     <PerfumeFormEdit
                         initialData={selectedPerfume}
-                        onRefresh={refreshPerfumes}
+                        onUpdate={handleUpdatePerfume}
                     />
                     <PerfumeTable
                         perfumes={perfumes}
+                        loading={loading}
                         onEdit={setSelectedPerfume}
-                        onRefresh={refreshPerfumes}
+                        onDelete={handleDeletePerfume}
                     />
                 </>
             ),

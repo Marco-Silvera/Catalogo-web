@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { createPerfume } from "@/actions/perfumes";
 
-function PerfumeForm() {
+function PerfumeForm({ onAdd }) {
     const [adding, setAdding] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -59,8 +59,10 @@ function PerfumeForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setAdding(true);
         try {
-            await createPerfume(formData);
+            const newPerfume = await createPerfume(formData);
+            onAdd(newPerfume);
             setFormData({
                 name: "",
                 path: "",

@@ -9,24 +9,46 @@ import PerfumeFormEdit from "../components/PerfumeFormEdit";
 import PerfumeTable from "../components/PerfumeTable";
 
 import ExclusiveForm from "../components/ExclusiveForm";
-// import ExclusiveFormEdit from "@/components/ExclusiveFormEdit";
-// import ExclusiveTable from "@/components/ExclusiveTable";
+import ExclusiveFormEdit from "../components/ExclusiveFormEdit";
+import ExclusiveTable from "../components/ExclusiveTable";
 
 import DecantForm from "../components/DecantForm";
-// import DecantFormEdit from "@/components/DecantFormEdit";
-// import DecantTable from "@/components/DecantTable";
+import DecantFormEdit from "../components/DecantFormEdit";
+import DecantTable from "../components/DecantTable";
 
 import MiniatureForm from "../components/MiniatureForm";
 import { getPerfumes } from "@/actions/perfumes";
+import { getExclusives } from "@/actions/exclusivos";
+import { getDecants } from "@/actions/decants";
+import { getMiniatures } from "@/actions/miniaturas";
+import MiniatureFormEdit from "../components/MiniatureFormEdit";
+import MiniatureTable from "../components/MiniatureTable";
 // import MiniatureFormEdit from "@/components/MiniatureFormEdit";
 // import MiniatureTable from "@/components/MiniatureTable";
 
 export default function Dashboard() {
     const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState("perfume");
+
+    // Estados para perfumes
     const [selectedPerfume, setSelectedPerfume] = useState(null);
     const [perfumes, setPerfumes] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Estados para exclusivos
+    const [exclusives, setExclusives] = useState([]);
+    const [selectedExclusive, setSelectedExclusive] = useState(null);
+    const [loadingExclusives, setLoadingExclusives] = useState(true);
+
+    // Estados para decants
+    const [decants, setDecants] = useState([]);
+    const [selectedDecant, setSelectedDecant] = useState(null);
+    const [loadingDecants, setLoadingDecants] = useState(true);
+
+    // Estados para miniaturas
+    const [miniatures, setMiniatures] = useState([]);
+    const [selectedMiniature, setSelectedMiniature] = useState(null);
+    const [loadingMiniatures, setLoadingMiniatures] = useState(true);
 
     // Verificar la sesión del usuario al cargar el componente
     useEffect(() => {
@@ -58,6 +80,55 @@ export default function Dashboard() {
         fetchData();
     }, []);
 
+    // Cargar exclusivos
+    useEffect(() => {
+        const fetchExclusives = async () => {
+            try {
+                const data = await getExclusives();
+                setExclusives(data);
+            } catch (error) {
+                console.error(error);
+                alert("Error al cargar los exclusivos");
+            } finally {
+                setLoadingExclusives(false);
+            }
+        };
+        fetchExclusives();
+    }, []);
+
+    // Cargar decants
+    useEffect(() => {
+        const fetchDecants = async () => {
+            try {
+                const data = await getDecants();
+                setDecants(data);
+            } catch (error) {
+                console.error(error);
+                alert("Error al cargar los decants");
+            } finally {
+                setLoadingDecants(false);
+            }
+        };
+        fetchDecants();
+    }, []);
+
+    // Cargar miniaturas
+    useEffect(() => {
+        const fetchMiniatures = async () => {
+            try {
+                const data = await getMiniatures();
+                setMiniatures(data);
+            } catch (error) {
+                console.error(error);
+                alert("Error al cargar las miniaturas");
+            } finally {
+                setLoadingMiniatures(false);
+            }
+        };
+        fetchMiniatures();
+    }, []);
+
+    // P E R F U M E S
     // Funciones para actualizar el estado local
     const handleAddPerfume = (newPerfume) => {
         setPerfumes((prev) => [...prev, newPerfume]);
@@ -74,6 +145,55 @@ export default function Dashboard() {
     const handleDeletePerfume = (id) => {
         setPerfumes((prev) => prev.filter((perfume) => perfume.id !== id));
     };
+
+    // E X C L U S I V O S
+    // Funciones para exclusivos
+    const handleAddExclusive = (newExclusive) =>
+        setExclusives((prev) => [...prev, newExclusive]);
+
+    const handleUpdateExclusive = (updatedExclusive) =>
+        setExclusives((prev) =>
+            prev.map((exclusive) =>
+                exclusive.id === updatedExclusive.id
+                    ? updatedExclusive
+                    : exclusive
+            )
+        );
+
+    const handleDeleteExclusive = (id) =>
+        setDecants((prev) => prev.filter((decant) => decant.id !== id));
+
+    // D E C A N T S
+    // Funciones para exclusivos
+    const handleAddDecant = (newDecant) =>
+        setDecants((prev) => [...prev, newDecant]);
+
+    const handleUpdateDecant = (updatedDecant) =>
+        setDecants((prev) =>
+            prev.map((decant) =>
+                decant.id === updatedDecant.id ? updatedDecant : decant
+            )
+        );
+
+    const handleDeleteDecant = (id) =>
+        setDecants((prev) => prev.filter((decant) => decant.id !== id));
+
+    // M I N I A T U R A S
+    // Funciones para exclusivos
+    const handleAddMiniature = (newMiniature) =>
+        setMiniatures((prev) => [...prev, newMiniature]);
+
+    const handleUpdateMiniature = (updatedMiniature) =>
+        setMiniatures((prev) =>
+            prev.map((miniature) =>
+                miniature.id === updatedMiniature.id
+                    ? updatedMiniature
+                    : miniature
+            )
+        );
+
+    const handleDeleteMiniature = (id) =>
+        setMiniatures((prev) => prev.filter((miniature) => miniature.id !== id));
 
     // Cerrar sesión
     const handleLogout = async () => {
@@ -115,32 +235,56 @@ export default function Dashboard() {
             ),
             exclusivos: (
                 <>
-                    <ExclusiveForm />
+                    <ExclusiveForm onAdd={handleAddExclusive} />
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
                         Edición
                     </h2>
-                    {/* {/* <ExclusiveFormEdit /> */}
-                    {/* <ExclusiveTable /> */}
-                </>
-            ),
-            miniaturas: (
-                <>
-                    <MiniatureForm />
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
-                        Edición
-                    </h2>
-                    {/* <MiniatureFormEdit />
-                            <MiniatureTable /> */}
+                    <ExclusiveFormEdit
+                        initialData={selectedExclusive}
+                        onUpdate={handleUpdateExclusive}
+                    />
+                    <ExclusiveTable
+                        exclusives={exclusives}
+                        loading={loadingExclusives}
+                        onEdit={setSelectedExclusive}
+                        onDelete={handleDeleteExclusive}
+                    />
                 </>
             ),
             decants: (
                 <>
-                    <DecantForm />
+                    <DecantForm onAdd={handleAddDecant} />
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
                         Edición
                     </h2>
-                    {/* <DecantFormEdit />
-                            <DecantTable /> */}
+                    <DecantFormEdit
+                        initialData={selectedDecant}
+                        onUpdate={handleUpdateDecant}
+                    />
+                    <DecantTable
+                        decants={decants}
+                        loading={loadingDecants}
+                        onEdit={setSelectedDecant}
+                        onDelete={handleDeleteDecant}
+                    />
+                </>
+            ),
+            miniaturas: (
+                <>
+                    <MiniatureForm onAdd={handleAddMiniature} />
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
+                        Edición
+                    </h2>
+                    <MiniatureFormEdit
+                        initialData={selectedMiniature}
+                        onUpdate={handleUpdateMiniature}
+                    />
+                    <MiniatureTable
+                        miniatures={miniatures}
+                        loading={loadingMiniatures}
+                        onEdit={setSelectedMiniature}
+                        onDelete={handleDeleteMiniature}
+                    />
                 </>
             ),
         };

@@ -10,21 +10,6 @@ export async function getPerfumes() {
     return data;
 }
 
-// // Crear un nuevo perfume
-// export async function createPerfume(perfumeData) {
-//     const { error } = await supabase.from("perfumes").insert([perfumeData]);
-//     if (error) throw error;
-// }
-
-// // Actualizar un perfume existente
-// export async function updatePerfume(id, updatedData) {
-//     const { error } = await supabase
-//         .from("perfumes")
-//         .update(updatedData)
-//         .eq("id", id);
-//     if (error) throw error;
-// }
-
 // Crear un nuevo perfume y retornar el registro insertado
 export async function createPerfume(perfumeData) {
     const { data, error } = await supabase

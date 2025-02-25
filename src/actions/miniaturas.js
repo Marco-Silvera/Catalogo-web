@@ -10,19 +10,25 @@ export async function getMiniatures() {
     return data;
 }
 
-// Crear un nueva miniatura
+// Crear una nueva miniatura y retornar el registro insertado
 export async function createMiniature(perfumeData) {
-    const { error } = await supabase.from("miniatures").insert([perfumeData]);
+    const { data, error } = await supabase
+        .from("miniatures")
+        .insert([perfumeData])
+        .select();
     if (error) throw error;
+    return data[0];
 }
 
-// Actualizar una miniatura existente
+// Actualizar una minaitura existente y retornar el registro actualizado
 export async function updateMiniature(id, updatedData) {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from("miniatures")
         .update(updatedData)
-        .eq("id", id);
+        .eq("id", id)
+        .select();
     if (error) throw error;
+    return data[0];
 }
 
 // Eliminar una miniatura

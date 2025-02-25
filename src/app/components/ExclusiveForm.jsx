@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { createExclusive } from "@/actions/exclusivos";
 
-function ExclusiveForm() {
+function ExclusiveForm({ onAdd }) {
     const [adding, setAdding] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -11,6 +11,7 @@ function ExclusiveForm() {
         version: "",
         gender: "",
         brand: "",
+        collection: "",
         concentration: "",
         size: "",
         price: "",
@@ -59,8 +60,10 @@ function ExclusiveForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setAdding(true);
         try {
-            await createExclusive(formData);
+            const newExclusive = await createExclusive(formData);
+            onAdd(newExclusive);
             setFormData({
                 name: "",
                 path: "",
@@ -119,7 +122,8 @@ function ExclusiveForm() {
                                     required
                                 />
                             </label>
-                            <label className="flex flex-col gap-2 items-start w-full font-medium">Colección
+                            <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                Colección
                                 <input
                                     className="border p-2 rounded-lg w-full outline-none focus:border-green-600 border-gray-200 font-normal"
                                     type="text"

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { createMiniature } from "@/actions/miniaturas";
 
-function MiniatureForm() {
+function MiniatureForm({ onAdd }) {
     const [adding, setAdding] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -56,8 +56,10 @@ function MiniatureForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setAdding(true);
         try {
-            await createMiniature(formData);
+            const newMiniature = await createMiniature(formData);
+            onAdd(newMiniature);
             setFormData({
                 name: "",
                 path: "",

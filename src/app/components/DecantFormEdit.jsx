@@ -1,91 +1,60 @@
 "use client";
-import { useState } from "react";
-import { createDecant } from "@/actions/decants";
+import { useState, useEffect } from "react";
+import { updateDecant } from "@/actions/decants";
 
-function DecantForm({ onAdd }) {
-    const [adding, setAdding] = useState(false);
-    const [formData, setFormData] = useState({
-        name: "",
-        path: "",
-        description: "",
-        gender: "",
-        brand: "",
-        concentration: "",
-        size: "",
-        sizetwo: "",
-        sizethree: "",
-        price: "",
-        pricetwo: "",
-        pricethree: "",
-        image: "",
-        imagetwo: "",
-        imagethree: "",
-    });
+function DecantFormEdit({ initialData, onUpdate }) {
+    const [formData, setFormData] = useState(initialData || {});
+    const [addingUpdate, setAddingUpdate] = useState(false);
 
-    const generatePath = (name) => {
+    const generatePathFromName = (name) => {
         return name
             .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
     };
 
-    // Manejar cambios en el campo name
-    const handleNameChange = (e) => {
-        const name = e.target.value;
-        setFormData((prevData) => ({
-            ...prevData,
-            name: name,
-            path: generatePath(name),
-        }));
-    };
+    // Cargar los datos iniciales si se proporciona un ID
+    useEffect(() => {
+        if (initialData?.id) {
+            setFormData({
+                ...initialData,
+                path: generatePathFromName(initialData.name),
+            });
+        }
+    }, [initialData]);
 
-    const isValidUrl = (url) => {
-        try {
-            new URL(url); // Intenta crear un objeto URL
-            return true;
-        } catch (e) {
-            return false; // Si falla, la URL no es válida
+    // Manejar cambios en los campos
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        if (type === "checkbox") {
+            setFormData({ ...formData, [name]: checked });
+        } else if (name === "name") {
+            setFormData({
+                ...formData,
+                name: value,
+                path: generatePathFromName(value),
+            });
+        } else {
+            setFormData({ ...formData, [name]: value });
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: type === "checkbox" ? checked : value,
-        }));
-    };
-
+    // Manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setAdding(true);
+        setAddingUpdate(true);
+
         try {
-            const newDecant = await createDecant(formData);
-            onAdd(newDecant);
-            setFormData({
-                name: "",
-                path: "",
-                description: "",
-                gender: "",
-                brand: "",
-                concentration: "",
-                size: "",
-                sizetwo: "",
-                sizethree: "",
-                price: "",
-                pricetwo: "",
-                pricethree: "",
-                image: "",
-                imagetwo: "",
-                imagethree: "",
-            });
+            const updated = await updateDecant(formData.id, formData);
+            // Se asume que updatePerfume retorna el registro actualizado.
+            onUpdate(updated);
+            setFormData({});
         } catch (error) {
             console.error(error);
-            alert("Error al agregar el decant");
+            alert("Error al actualizar el decant");
         } finally {
-            setAdding(false); // Desactiva el estado de carga
+            setAddingUpdate(false);
         }
     };
 
@@ -106,8 +75,8 @@ function DecantForm({ onAdd }) {
                                     type="text"
                                     name="name"
                                     placeholder="Nombre de perfume"
-                                    onChange={handleNameChange}
-                                    value={formData.name}
+                                    onChange={handleChange}
+                                    value={formData.name || ""}
                                     required
                                 />
                             </label>
@@ -118,7 +87,7 @@ function DecantForm({ onAdd }) {
                                     type="text"
                                     name="path"
                                     placeholder="Path de perfume"
-                                    value={formData.path}
+                                    value={formData.path || ""}
                                     disabled
                                     required
                                 />
@@ -131,7 +100,7 @@ function DecantForm({ onAdd }) {
                                         className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                         name="gender"
                                         onChange={handleChange}
-                                        value={formData.gender}
+                                        value={formData.gender || ""}
                                         required
                                     >
                                         <option value="" disabled>
@@ -150,7 +119,7 @@ function DecantForm({ onAdd }) {
                                     className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                     name="brand"
                                     onChange={handleChange}
-                                    value={formData.brand}
+                                    value={formData.brand || ""}
                                     required
                                 >
                                     <option value="" disabled>
@@ -290,7 +259,7 @@ function DecantForm({ onAdd }) {
                                     name="concentration"
                                     placeholder="Concentración de perfume"
                                     onChange={handleChange}
-                                    value={formData.concentration}
+                                    value={formData.concentration || ""}
                                     required
                                 />
                             </label>
@@ -305,7 +274,7 @@ function DecantForm({ onAdd }) {
                                         name="size"
                                         placeholder="Tamaño"
                                         onChange={handleChange}
-                                        value={formData.size}
+                                        value={formData.size || ""}
                                         min="0"
                                         max="500"
                                         required
@@ -321,7 +290,7 @@ function DecantForm({ onAdd }) {
                                         name="price"
                                         placeholder="Precio"
                                         onChange={handleChange}
-                                        value={formData.price}
+                                        value={formData.price || ""}
                                         min="0"
                                         max="3000"
                                         required
@@ -336,7 +305,7 @@ function DecantForm({ onAdd }) {
                                         name="sizetwo"
                                         placeholder="Tamaño"
                                         onChange={handleChange}
-                                        value={formData.sizetwo}
+                                        value={formData.sizetwo || ""}
                                         min="0"
                                         max="500"
                                         required
@@ -352,7 +321,7 @@ function DecantForm({ onAdd }) {
                                         name="pricetwo"
                                         placeholder="Precio"
                                         onChange={handleChange}
-                                        value={formData.pricetwo}
+                                        value={formData.pricetwo || ""}
                                         min="0"
                                         max="3000"
                                         required
@@ -367,7 +336,7 @@ function DecantForm({ onAdd }) {
                                         name="sizethree"
                                         placeholder="Tamaño"
                                         onChange={handleChange}
-                                        value={formData.sizethree}
+                                        value={formData.sizethree || ""}
                                         min="0"
                                         max="500"
                                         required
@@ -383,7 +352,7 @@ function DecantForm({ onAdd }) {
                                         name="pricethree"
                                         placeholder="Precio"
                                         onChange={handleChange}
-                                        value={formData.pricethree}
+                                        value={formData.pricethree || ""}
                                         min="0"
                                         max="3000"
                                         required
@@ -402,7 +371,7 @@ function DecantForm({ onAdd }) {
                                     name="description"
                                     placeholder="Descripción de perfume"
                                     onChange={handleChange}
-                                    value={formData.description}
+                                    value={formData.description || ""}
                                     required
                                 ></textarea>
                             </label>
@@ -424,22 +393,21 @@ function DecantForm({ onAdd }) {
                                         name="image"
                                         placeholder="Imagen principal de perfume"
                                         onChange={handleChange}
-                                        value={formData.image}
+                                        value={formData.image || ""}
                                         required
                                     />
                                 </label>
 
-                                {formData.image &&
-                                    isValidUrl(formData.image) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.image}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    )}
+                                {formData.image && (
+                                    <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+                                        <img
+                                            src={formData.image}
+                                            alt={`Imagen principal de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Segunda imagen */}
@@ -452,22 +420,21 @@ function DecantForm({ onAdd }) {
                                         name="imagetwo"
                                         placeholder="Segunda imagen"
                                         onChange={handleChange}
-                                        value={formData.imagetwo}
+                                        value={formData.imagetwo || ""}
                                         required
                                     />
                                 </label>
 
-                                {formData.imagetwo &&
-                                    isValidUrl(formData.imagetwo) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagetwo}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    )}
+                                {formData.imagetwo && (
+                                    <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+                                        <img
+                                            src={formData.imagetwo}
+                                            alt={`Imagen principal de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Tercera imagen */}
@@ -480,22 +447,21 @@ function DecantForm({ onAdd }) {
                                         name="imagethree"
                                         placeholder="Tercera imagen"
                                         onChange={handleChange}
-                                        value={formData.imagethree}
+                                        value={formData.imagethree || ""}
                                         required
                                     />
                                 </label>
 
-                                {formData.imagethree &&
-                                    isValidUrl(formData.imagethree) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagethree}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    )}
+                                {formData.imagethree && (
+                                    <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+                                        <img
+                                            src={formData.imagethree}
+                                            alt={`Imagen principal de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </section>
@@ -503,14 +469,14 @@ function DecantForm({ onAdd }) {
                 {/* Repite para otros campos... */}
 
                 <button
-                    disabled={adding}
+                    disabled={addingUpdate}
                     className="bg-green-500 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-green-500 hover:text-green-500"
                 >
-                    {adding ? "Agregando..." : "Agregar"}
+                    {addingUpdate ? "Agregando..." : "Agregar"}
                 </button>
             </form>
         </section>
     );
 }
 
-export default DecantForm;
+export default DecantFormEdit;

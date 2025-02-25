@@ -1,15 +1,15 @@
 "use client";
-import { deletePerfume } from "@/actions/perfumes";
+import { deleteExclusive } from "@/actions/exclusivos";
 import Link from "next/link";
 
-function PerfumeRowDashboard({ perfume, onEdit, onDelete }) {
+function ExclusiveRowDashboard({ exclusive, onEdit, onDelete }) {
     const handleDelete = async () => {
         try {
-            await deletePerfume(perfume.id);
-            onDelete(perfume.id); // Actualiza la tabla
+            await deleteExclusive(exclusive.id);
+            onDelete(exclusive.id); // Actualiza la tabla
         } catch (error) {
             console.error(error);
-            alert("Error al eliminar el perfume");
+            alert("Error al eliminar el exclusivo");
         }
     };
 
@@ -17,62 +17,62 @@ function PerfumeRowDashboard({ perfume, onEdit, onDelete }) {
         <tr className="bg-white border-b hover:bg-gray-100 text-center even:bg-gray-50">
             <th
                 scope="row"
-                className="px-2 py-4 font-medium text-gray-900 w-full max-w-[300px] truncate"
+                className="px-2 py-4 font-medium text-gray-900 w-full max-w-[250px] truncate"
             >
-                {perfume.name}
+                {exclusive.name}
             </th>
-            <td className="px-2 py-4 text-xs w-full max-w-[500px] truncate">
-                {perfume.description}
+            <td className="px-2 py-4 text-xs w-full max-w-[400px] truncate">
+                {exclusive.description}
             </td>
-            <td className="px-2 py-4 text-xs  w-full min-w-[100px] max-w-[150px] truncate">
-                {perfume.version.toLowerCase() === "tester" ? (
+            <td className="px-2 py-4 text-xs w-full min-w-[100px] max-w-[150px] truncate">
+                {exclusive.version.toLowerCase() === "tester" ? (
                     <Link
-                        href={`/tester/${perfume.path}`}
+                        href={`/tester/${exclusive.path}`}
                         target="_blank"
                         className="text-blue-600 hover:underline"
                     >
-                        {perfume.path}
+                        {exclusive.path}
                     </Link>
                 ) : (
                     <Link
-                        href={`/${perfume.path}`}
+                        href={`/${exclusive.path}`}
                         target="_blank"
                         className="text-blue-600 hover:underline"
                     >
-                        {perfume.path}
+                        {exclusive.path}
                     </Link>
                 )}
             </td>
-            <td className="px-2 py-4 w-full min-w-[100px] max-w-[150px] truncate">{perfume.brand}</td>
-            <td className="px-2 py-4">{perfume.concentration}</td>
-            <td className="px-2 py-4">{perfume.version}</td>
+            <td className="px-2 py-4 w-full min-w-[100px] max-w-[150px] truncate">{exclusive.brand}</td>
+            <td className="px-2 py-4">{exclusive.concentration}</td>
+            <td className="px-2 py-4">{exclusive.version}</td>
             <td className="px-2 py-4">
-                {perfume.box ? <p className="font-bold">Si</p> : "No"}
+                {exclusive.box ? <p className="font-bold">Si</p> : "No"}
             </td>
-            <td className="px-2 py-4">{perfume.gender}</td>
-            <td className="px-2 py-4">{perfume.size} ml</td>
-            <td className="px-2 py-4">{perfume.price}</td>
+            <td className="px-2 py-4">{exclusive.gender}</td>
+            <td className="px-2 py-4">{exclusive.size} ml</td>
+            <td className="px-2 py-4">{exclusive.price}</td>
             <td className="px-2 py-4">
                 <div className="grid grid-cols-2 gap-2 w-20 min-w-20 md:w-[100px] md:min-w-[100px] justify-items-center items-center h-full">
                     <img
                         className="w-full h-full object-cover aspect-square"
-                        src={perfume.image}
-                        alt={perfume.name}
+                        src={exclusive.image}
+                        alt={exclusive.name}
                     />
                     <img
                         className="aspect-square"
-                        src={perfume.imagetwo}
-                        alt={perfume.name}
+                        src={exclusive.imagetwo}
+                        alt={exclusive.name}
                     />
                     <img
                         className="aspect-square"
-                        src={perfume.imagethree}
-                        alt={perfume.name}
+                        src={exclusive.imagethree}
+                        alt={exclusive.name}
                     />
                     <img
                         className="aspect-square"
-                        src={perfume.imagefour}
-                        alt={perfume.name}
+                        src={exclusive.imagefour}
+                        alt={exclusive.name}
                     />
                 </div>
             </td>
@@ -80,7 +80,7 @@ function PerfumeRowDashboard({ perfume, onEdit, onDelete }) {
                 <div className="flex flex-col gap-5 justify-center">
                     <button
                         className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                        onClick={() => onEdit(perfume)}
+                        onClick={() => onEdit(exclusive)}
                     >
                         Editar
                     </button>
@@ -96,4 +96,4 @@ function PerfumeRowDashboard({ perfume, onEdit, onDelete }) {
     );
 }
 
-export default PerfumeRowDashboard;
+export default ExclusiveRowDashboard;

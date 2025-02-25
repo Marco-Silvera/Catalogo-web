@@ -10,19 +10,25 @@ export async function getExclusives() {
     return data;
 }
 
-// Crear un nuevo exclusivo
-export async function createExclusive(perfumeData) {
-    const { error } = await supabase.from("exclusives").insert([perfumeData]);
+// Crear un nuevo exclusivo y retornar el registro insertado
+export async function createExclusive(exclusiveData) {
+    const { data, error } = await supabase
+        .from("exclusives")
+        .insert([exclusiveData])
+        .select();
     if (error) throw error;
+    return data[0];
 }
 
-// Actualizar un exclusivo existente
+// Actualizar un exclusivo existente y retornar el registro actualizado
 export async function updateExclusive(id, updatedData) {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from("exclusives")
         .update(updatedData)
-        .eq("id", id);
+        .eq("id", id)
+        .select();
     if (error) throw error;
+    return data[0];
 }
 
 // Eliminar un exclusivo

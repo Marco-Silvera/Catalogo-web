@@ -10,19 +10,27 @@ export async function getDecants() {
     return data;
 }
 
-// Crear un nuevo decant
-export async function createDecant(perfumeData) {
-    const { error } = await supabase.from("decants").insert([perfumeData]);
+
+// Crear un nuevo decant y retornar el registro insertado
+export async function createDecant(decantData) {
+    const { data, error } = await supabase
+        .from("decants")
+        .insert([decantData])
+        .select();
     if (error) throw error;
+    return data[0];
 }
 
-// Actualizar un decant existente
+
+// Actualizar un decant existente y retornar el registro actualizado
 export async function updateDecant(id, updatedData) {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from("decants")
         .update(updatedData)
-        .eq("id", id);
+        .eq("id", id)
+        .select();
     if (error) throw error;
+    return data[0];
 }
 
 // Eliminar un decant

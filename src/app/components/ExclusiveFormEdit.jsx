@@ -1,91 +1,61 @@
 "use client";
-import { useState } from "react";
-import { createDecant } from "@/actions/decants";
+import { useEffect, useState } from "react";
+import { updateExclusive } from "@/actions/exclusivos";
 
-function DecantForm({ onAdd }) {
-    const [adding, setAdding] = useState(false);
-    const [formData, setFormData] = useState({
-        name: "",
-        path: "",
-        description: "",
-        gender: "",
-        brand: "",
-        concentration: "",
-        size: "",
-        sizetwo: "",
-        sizethree: "",
-        price: "",
-        pricetwo: "",
-        pricethree: "",
-        image: "",
-        imagetwo: "",
-        imagethree: "",
-    });
+function ExclusiveFormEdit({ initialData, onUpdate }) {
+    const [formData, setFormData] = useState(initialData || {});
+    const [addingUpdate, setAddingUpdate] = useState(false);
 
-    const generatePath = (name) => {
+    // Función para generar el path automáticamente
+    const generatePathFromName = (name) => {
         return name
             .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
     };
 
-    // Manejar cambios en el campo name
-    const handleNameChange = (e) => {
-        const name = e.target.value;
-        setFormData((prevData) => ({
-            ...prevData,
-            name: name,
-            path: generatePath(name),
-        }));
-    };
+    // Cargar los datos iniciales si se proporciona un ID
+    useEffect(() => {
+        if (initialData?.id) {
+            setFormData({
+                ...initialData,
+                path: generatePathFromName(initialData.name),
+            });
+        }
+    }, [initialData]);
 
-    const isValidUrl = (url) => {
-        try {
-            new URL(url); // Intenta crear un objeto URL
-            return true;
-        } catch (e) {
-            return false; // Si falla, la URL no es válida
+    // Manejar cambios en los campos
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        if (type === "checkbox") {
+            setFormData({ ...formData, [name]: checked });
+        } else if (name === "name") {
+            setFormData({
+                ...formData,
+                name: value,
+                path: generatePathFromName(value),
+            });
+        } else {
+            setFormData({ ...formData, [name]: value });
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: type === "checkbox" ? checked : value,
-        }));
-    };
-
+    // Manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setAdding(true);
+        setAddingUpdate(true);
+
         try {
-            const newDecant = await createDecant(formData);
-            onAdd(newDecant);
-            setFormData({
-                name: "",
-                path: "",
-                description: "",
-                gender: "",
-                brand: "",
-                concentration: "",
-                size: "",
-                sizetwo: "",
-                sizethree: "",
-                price: "",
-                pricetwo: "",
-                pricethree: "",
-                image: "",
-                imagetwo: "",
-                imagethree: "",
-            });
+            const updated = await updateExclusive(formData.id, formData);
+            // Se asume que updatePerfume retorna el registro actualizado.
+            onUpdate(updated);
+            setFormData({});
         } catch (error) {
             console.error(error);
-            alert("Error al agregar el decant");
+            alert("Error al actualizar el exclusivo");
         } finally {
-            setAdding(false); // Desactiva el estado de carga
+            setAddingUpdate(false);
         }
     };
 
@@ -95,10 +65,10 @@ function DecantForm({ onAdd }) {
                 onSubmit={handleSubmit}
                 className="flex flex-col gap-5 justify-center"
             >
-                {/* Ejemplo de un campo */}
                 <div className="flex flex-col gap-5 sm:gap-10">
                     <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-2 sm:gap-5 justify-center">
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-5 sm:gap-x-5 text-sm sm:text-base">
+                            {/* Nombre */}
                             <label className="flex flex-col gap-2 items-start w-full font-medium">
                                 Nombre
                                 <input
@@ -106,11 +76,13 @@ function DecantForm({ onAdd }) {
                                     type="text"
                                     name="name"
                                     placeholder="Nombre de perfume"
-                                    onChange={handleNameChange}
-                                    value={formData.name}
+                                    onChange={handleChange}
+                                    value={formData.name || ""}
                                     required
                                 />
                             </label>
+
+                            {/* Path */}
                             <label className="flex flex-col gap-2 items-start w-full font-medium">
                                 Path
                                 <input
@@ -118,24 +90,55 @@ function DecantForm({ onAdd }) {
                                     type="text"
                                     name="path"
                                     placeholder="Path de perfume"
-                                    value={formData.path}
+                                    value={formData.path || ""}
                                     disabled
                                     required
                                 />
                             </label>
 
+                            {/* Collection */}
+                            <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                Collection
+                                <input
+                                    className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    type="text"
+                                    name="collection"
+                                    placeholder="Colección de perfume"
+                                    value={formData.collection || ""}
+                                    disabled
+                                    required
+                                />
+                            </label>
                             <div className="flex w-full gap-2 sm:gap-5 order-1 lg:order-0">
+                                {/* Versión */}
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Versión
+                                    <select
+                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                        name="version"
+                                        onChange={handleChange}
+                                        value={formData.version || ""}
+                                        required
+                                    >
+                                        <option value="" disabled>
+                                            Selecciona versión
+                                        </option>
+                                        <option value="Tester">Tester</option>
+                                        <option value="Sellado">Sellado</option>
+                                    </select>
+                                </label>
                                 <label className="flex flex-col gap-2 items-start w-full  font-medium">
+                                    {" "}
                                     Género
                                     <select
                                         className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                         name="gender"
                                         onChange={handleChange}
-                                        value={formData.gender}
+                                        value={formData.gender || ""}
                                         required
                                     >
                                         <option value="" disabled>
-                                            Género
+                                            Selecciona el genero
                                         </option>
                                         <option value="Hombre">Hombre</option>
                                         <option value="Mujer">Mujer</option>
@@ -145,16 +148,17 @@ function DecantForm({ onAdd }) {
                             </div>
 
                             <label className="flex flex-col gap-2 items-start w-full font-medium order-1 lg:order-none">
+                                {" "}
                                 Marca
                                 <select
                                     className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                     name="brand"
                                     onChange={handleChange}
-                                    value={formData.brand}
+                                    value={formData.brand || ""}
                                     required
                                 >
                                     <option value="" disabled>
-                                        Selecciona marca
+                                        Selecciona una marca
                                     </option>
                                     <option value="Abercrombie & Fitch">
                                         Abercrombie & Fitch
@@ -281,109 +285,55 @@ function DecantForm({ onAdd }) {
                                     </option>
                                 </select>
                             </label>
-                            <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                {" "}
-                                Concentración
-                                <input
-                                    className="border p-2 rounded-lg w-full outline-none focus:border-green-600 border-gray-200 font-normal"
-                                    type="text"
-                                    name="concentration"
-                                    placeholder="Concentración de perfume"
-                                    onChange={handleChange}
-                                    value={formData.concentration}
-                                    required
-                                />
-                            </label>
-
-                            <div className="grid grid-cols-2 w-full gap-2 sm:gap-5 order-3 text-xs sm:text-base">
+                            <div className="flex w-full gap-2 sm:gap-5 order-1 lg:order-0">
                                 <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    {" "}
-                                    Tamaño 1
+                                    Concentración
                                     <input
-                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                        type="text"
+                                        name="concentration"
+                                        value={formData.concentration || ""}
+                                        onChange={handleChange}
+                                        placeholder="Concentración de perfume"
+                                        className="border p-2 rounded-lg w-full outline-none focus:border-green-600 border-gray-200 font-normal"
+                                        required
+                                    />
+                                </label>
+                                {/* Checkbox de Caja */}
+                                <label className="flex flex-col gap-4 items-center w-14 font-medium text-center">
+                                    Caja
+                                    <input
+                                        className="border border-gray-200 p-2 rounded-lg h-5 w-5 outline-none font-normal"
+                                        name="box"
+                                        type="checkbox"
+                                        checked={formData.box || false}
+                                        onChange={handleChange}
+                                    />
+                                </label>
+                            </div>
+                            <div className="flex w-full gap-2 sm:gap-5 order-3">
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Tamaño
+                                    <input
                                         type="number"
                                         name="size"
-                                        placeholder="Tamaño"
+                                        value={formData.size || ""}
                                         onChange={handleChange}
-                                        value={formData.size}
+                                        placeholder="Tamaño"
+                                        className="border p-2 rounded-lg w-full outline-none focus:border-green-600 border-gray-200 font-normal"
                                         min="0"
                                         max="500"
                                         required
                                     />
                                 </label>
-
-                                <label className="flex flex-col gap-2 items-start w-full  font-medium">
-                                    {" "}
-                                    Precio 1
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Precio
                                     <input
-                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                         type="number"
                                         name="price"
+                                        value={formData.price || ""}
+                                        onChange={handleChange}
                                         placeholder="Precio"
-                                        onChange={handleChange}
-                                        value={formData.price}
-                                        min="0"
-                                        max="3000"
-                                        required
-                                    />
-                                </label>
-                                <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    {" "}
-                                    Tamaño 2
-                                    <input
-                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="number"
-                                        name="sizetwo"
-                                        placeholder="Tamaño"
-                                        onChange={handleChange}
-                                        value={formData.sizetwo}
-                                        min="0"
-                                        max="500"
-                                        required
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-2 items-start w-full  font-medium">
-                                    {" "}
-                                    Precio 2
-                                    <input
-                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="number"
-                                        name="pricetwo"
-                                        placeholder="Precio"
-                                        onChange={handleChange}
-                                        value={formData.pricetwo}
-                                        min="0"
-                                        max="3000"
-                                        required
-                                    />
-                                </label>
-                                <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    {" "}
-                                    Tamaño 3
-                                    <input
-                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="number"
-                                        name="sizethree"
-                                        placeholder="Tamaño"
-                                        onChange={handleChange}
-                                        value={formData.sizethree}
-                                        min="0"
-                                        max="500"
-                                        required
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-2 items-start w-full  font-medium">
-                                    {" "}
-                                    Precio 3
-                                    <input
-                                        className="border border-gray-200 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="number"
-                                        name="pricethree"
-                                        placeholder="Precio"
-                                        onChange={handleChange}
-                                        value={formData.pricethree}
+                                        className="border p-2 rounded-lg w-full outline-none focus:border-green-600 border-gray-200 font-normal"
                                         min="0"
                                         max="3000"
                                         required
@@ -391,126 +341,122 @@ function DecantForm({ onAdd }) {
                                 </label>
                             </div>
                         </div>
-
                         <div className="row-span-8 md:row-span-1 col-start-1 md:col-start-2 text-sm sm:text-base">
                             <label className="flex flex-col gap-2 items-start w-full h-full font-medium">
-                                {" "}
                                 Descripción
                                 <textarea
-                                    className="border border-gray-200 p-2 rounded-lg w-full resize-none h-full  outline-none focus:border-green-600 font-normal"
                                     type="text"
                                     name="description"
-                                    placeholder="Descripción de perfume"
+                                    value={formData.description || ""}
                                     onChange={handleChange}
-                                    value={formData.description}
-                                    required
+                                    placeholder="Descripción de perfume"
+                                    className="border border-gray-200 p-2 rounded-lg w-full resize-none h-full  outline-none focus:border-green-600 font-normal"
                                 ></textarea>
                             </label>
                         </div>
                     </div>
-
                     <section className="flex flex-col gap-5 mt-3 text-sm sm:text-base">
                         <h3 className="text-xl uppercase font-semibold">
                             Imágenes
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 justify-center">
-                            {/* Imagen principal */}
                             <div className="flex flex-col gap-2">
                                 <label className="flex flex-col gap-2 items-start w-full font-medium">
                                     Imagen principal
                                     <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                         type="text"
                                         name="image"
-                                        placeholder="Imagen principal de perfume"
+                                        value={formData.image || ""}
                                         onChange={handleChange}
-                                        value={formData.image}
-                                        required
+                                        placeholder="Imagen principal de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full  outline-none focus:border-green-600 font-normal"
                                     />
                                 </label>
 
-                                {formData.image &&
-                                    isValidUrl(formData.image) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.image}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    )}
+                                {formData.image && (
+                                    <img
+                                        src={formData.image || ""}
+                                        alt={`Imagen principal de ${formData.name}`}
+                                        className="w-full h-auto aspect-square object-cover rounded-lg"
+                                    />
+                                )}
                             </div>
-
-                            {/* Segunda imagen */}
                             <div className="flex flex-col gap-2">
                                 <label className="flex flex-col gap-2 items-start w-full font-medium">
                                     Segunda imagen
                                     <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                         type="text"
                                         name="imagetwo"
-                                        placeholder="Segunda imagen"
+                                        value={formData.imagetwo || ""}
                                         onChange={handleChange}
-                                        value={formData.imagetwo}
-                                        required
+                                        placeholder="Segunda imagen de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full  outline-none focus:border-green-600 font-normal"
                                     />
                                 </label>
-
-                                {formData.imagetwo &&
-                                    isValidUrl(formData.imagetwo) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagetwo}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    )}
+                                {formData.imagetwo && (
+                                    <img
+                                        src={formData.imagetwo || ""}
+                                        alt={`Segunda imagen de ${formData.name}`}
+                                        className="w-full h-auto aspect-square object-cover rounded-lg"
+                                    />
+                                )}
                             </div>
-
-                            {/* Tercera imagen */}
                             <div className="flex flex-col gap-2">
                                 <label className="flex flex-col gap-2 items-start w-full font-medium">
                                     Tercera imagen
                                     <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
                                         type="text"
                                         name="imagethree"
-                                        placeholder="Tercera imagen"
+                                        value={formData.imagethree || ""}
                                         onChange={handleChange}
-                                        value={formData.imagethree}
-                                        required
+                                        placeholder="Tercera imagen de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full  outline-none focus:border-green-600 font-normal"
                                     />
                                 </label>
+                                {formData.imagethree && (
+                                    <img
+                                        src={formData.imagethree || ""}
+                                        alt={`Tercera imagen de ${formData.name}`}
+                                        className="w-full h-auto aspect-square object-cover rounded-lg"
+                                    />
+                                )}
+                            </div>
 
-                                {formData.imagethree &&
-                                    isValidUrl(formData.imagethree) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagethree}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    )}
+                            <div className="flex flex-col gap-2">
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Cuarta imagen
+                                    <input
+                                        type="text"
+                                        name="imagefour"
+                                        value={formData.imagefour || ""}
+                                        onChange={handleChange}
+                                        placeholder="Cuarta imagen de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full  outline-none focus:border-green-600 font-normal"
+                                    />
+                                </label>
+                                {formData.imagefour && (
+                                    <img
+                                        src={formData.imagefour || ""}
+                                        alt={`Cuarta imagen de ${formData.name}`}
+                                        className="w-full h-auto aspect-square object-cover rounded-lg"
+                                    />
+                                )}
                             </div>
                         </div>
                     </section>
                 </div>
-                {/* Repite para otros campos... */}
+                {/* Resto de los campos... */}
 
+                {/* Botón de envío */}
                 <button
-                    disabled={adding}
-                    className="bg-green-500 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-green-500 hover:text-green-500"
+                    disabled={addingUpdate}
+                    className="bg-green-500 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-green-600 hover:text-green-600"
                 >
-                    {adding ? "Agregando..." : "Agregar"}
+                    {addingUpdate ? "Guardando..." : "Guardar cambios"}
                 </button>
             </form>
         </section>
     );
 }
 
-export default DecantForm;
+export default ExclusiveFormEdit;

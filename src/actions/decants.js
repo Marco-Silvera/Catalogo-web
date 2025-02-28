@@ -10,7 +10,6 @@ export async function getDecants() {
     return data;
 }
 
-
 // Crear un nuevo decant y retornar el registro insertado
 export async function createDecant(decantData) {
     const { data, error } = await supabase
@@ -20,7 +19,6 @@ export async function createDecant(decantData) {
     if (error) throw error;
     return data[0];
 }
-
 
 // Actualizar un decant existente y retornar el registro actualizado
 export async function updateDecant(id, updatedData) {
@@ -47,5 +45,26 @@ export async function getDecantById(id) {
         .eq("id", id)
         .single();
     if (error) throw error;
+    return data;
+}
+
+// Obtener decants para generar rutas dinámicas (usando solo el campo "path")
+export async function fetchDecantsForPaths() {
+    const { data, error } = await supabase
+        .from("decants")
+        .select("path")
+        .order("id", { ascending: true });
+    if (error) throw error;
+    return data;
+}
+
+// Obtener un decant por su "path"
+export async function getDecantByPath(path) {
+    const { data, error } = await supabase
+        .from("decants")
+        .select("*")
+        .eq("path", path)
+        .single();
+    if (error) return null;
     return data;
 }

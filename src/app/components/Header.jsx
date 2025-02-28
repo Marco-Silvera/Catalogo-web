@@ -99,7 +99,7 @@ function Header() {
                             </li>
                             <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
                                 <a
-                                    href="decants"
+                                    href="/decants"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     Decants
@@ -107,7 +107,7 @@ function Header() {
                             </li>
                             <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
                                 <a
-                                    href="testers"
+                                    href="/testers"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     ¿Qué es un perfume tester?

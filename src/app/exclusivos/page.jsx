@@ -1,13 +1,15 @@
-// import { useEffect, useState } from 'react';
-// import { supabase } from '../supabase/client';
-// import ExclusiveListExclusives from '../components/ExclusiveListExclusives';
+import ExclusiveList from "../components/ExclusiveList";
 import HeroExclusives from "../components/HeroExclusives";
+import { getExclusives } from "@/actions/exclusivos";
 
-function Exclusives() {
+export async function Exclusives() {
+    const exclusives = await getExclusives().catch((error) => {
+        console.error("Error al obtener exclusivos: ", error);
+    });
     return (
         <main className="flex-grow mx-auto w-full max-w-[1500px] px-5 pb-10 pt-5 sm:pt-10 flex flex-col gap-10">
             <HeroExclusives />
-            {/* <ExclusiveListExclusives /> */}
+            <ExclusiveList exclusives={exclusives} />
         </main>
     );
 }

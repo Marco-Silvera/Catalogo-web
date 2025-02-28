@@ -25,15 +25,8 @@ function MiniatureRowDashboard({ miniature, onEdit, onDelete }) {
             </td>
             <td className="px-2 py-4 text-xs w-full min-w-[100px] max-w-[150px] truncate">
                 <Link
-                    href={`/${miniature.path}`}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        window.open(
-                            `/miniaturas/${miniature.path}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                        );
-                    }}
+                    href={`/miniaturas/${miniature.path}`}
+                    target="_blank"
                     className="text-blue-600 hover:underline"
                 >
                     {miniature.path}

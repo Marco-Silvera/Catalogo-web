@@ -47,3 +47,24 @@ export async function getMiniatureById(id) {
     if (error) throw error;
     return data;
 }
+
+// Obtener miniatures para generar rutas estáticas (se necesita el campo "path")
+export async function fetchMiniaturesForPaths() {
+    const { data, error } = await supabase
+        .from("miniatures")
+        .select("path")
+        .order("id", { ascending: true });
+    if (error) throw error;
+    return data;
+}
+
+// Obtener una miniatura por su "path"
+export async function getMiniatureByPath(path) {
+    const { data, error } = await supabase
+        .from("miniatures")
+        .select("*")
+        .eq("path", path)
+        .single();
+    if (error) return null;
+    return data;
+}

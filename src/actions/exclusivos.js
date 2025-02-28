@@ -47,3 +47,14 @@ export async function getExclusiveById(id) {
     if (error) throw error;
     return data;
 }
+
+// Obtener un exclusivo por path
+export async function getExclusiveByPath(path) {
+    const { data, error } = await supabase
+        .from("exclusives")
+        .select("*")
+        .eq("path", path)
+        .single();
+    if (error) return null;
+    return data;
+}

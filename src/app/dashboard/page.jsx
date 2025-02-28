@@ -161,7 +161,9 @@ export default function Dashboard() {
         );
 
     const handleDeleteExclusive = (id) =>
-        setDecants((prev) => prev.filter((decant) => decant.id !== id));
+        setExclusives((prev) =>
+            prev.filter((exclusive) => exclusive.id !== id)
+        );
 
     // D E C A N T S
     // Funciones para exclusivos
@@ -193,7 +195,9 @@ export default function Dashboard() {
         );
 
     const handleDeleteMiniature = (id) =>
-        setMiniatures((prev) => prev.filter((miniature) => miniature.id !== id));
+        setMiniatures((prev) =>
+            prev.filter((miniature) => miniature.id !== id)
+        );
 
     // Cerrar sesión
     const handleLogout = async () => {

@@ -25,25 +25,17 @@ function ExclusiveRowDashboard({ exclusive, onEdit, onDelete }) {
                 {exclusive.description}
             </td>
             <td className="px-2 py-4 text-xs w-full min-w-[100px] max-w-[150px] truncate">
-                {exclusive.version.toLowerCase() === "tester" ? (
-                    <Link
-                        href={`/tester/${exclusive.path}`}
-                        target="_blank"
-                        className="text-blue-600 hover:underline"
-                    >
-                        {exclusive.path}
-                    </Link>
-                ) : (
-                    <Link
-                        href={`/${exclusive.path}`}
-                        target="_blank"
-                        className="text-blue-600 hover:underline"
-                    >
-                        {exclusive.path}
-                    </Link>
-                )}
+                <Link
+                    href={`/exclusivos/${exclusive.path}`}
+                    target="_blank"
+                    className="text-blue-600 hover:underline"
+                >
+                    {exclusive.path}
+                </Link>
             </td>
-            <td className="px-2 py-4 w-full min-w-[100px] max-w-[150px] truncate">{exclusive.brand}</td>
+            <td className="px-2 py-4 w-full min-w-[100px] max-w-[150px] truncate">
+                {exclusive.brand}
+            </td>
             <td className="px-2 py-4">{exclusive.concentration}</td>
             <td className="px-2 py-4">{exclusive.version}</td>
             <td className="px-2 py-4">

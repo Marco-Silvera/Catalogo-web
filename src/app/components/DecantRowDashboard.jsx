@@ -25,21 +25,16 @@ function DecantRowDashboard({ decant, onEdit, onDelete }) {
             </td>
             <td className="px-2 py-4 text-xs w-full min-w-[100px] max-w-[150px] truncate">
                 <Link
-                    href={`/${decant.path}`}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        window.open(
-                            `/decants/${decant.path}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                        );
-                    }}
+                    href={`/decants/${decant.path}`}
+                    target="_blank"
                     className="text-blue-600 hover:underline"
                 >
                     {decant.path}
                 </Link>
             </td>
-            <td className="px-2 py-4 w-full min-w-[100px] max-w-[150px] truncate">{decant.brand}</td>
+            <td className="px-2 py-4 w-full min-w-[100px] max-w-[150px] truncate">
+                {decant.brand}
+            </td>
             <td className="px-2 py-4">{decant.concentration}</td>
             <td className="px-2 py-4">{decant.gender}</td>
             <td className="px-2 py-4">{decant.size} ml</td>

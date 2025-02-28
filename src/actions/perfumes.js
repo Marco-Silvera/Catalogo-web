@@ -47,3 +47,30 @@ export async function getPerfumeById(id) {
     if (error) throw error;
     return data;
 }
+
+
+
+
+// Obtener perfumes por versión
+export async function fetchPerfumesByVersion(version) {
+    const { data, error } = await supabase
+        .from("perfumes")
+        .select("path")
+        .eq("version", version);
+
+    if (error) throw error;
+    return data;
+}
+
+// Obtener perfume por path y versión
+export async function getPerfumeByPath(path, version) {
+    const { data, error } = await supabase
+        .from("perfumes")
+        .select("*")
+        .eq("path", path)
+        .eq("version", version)
+        .single();
+
+    if (error) return null;
+    return data;
+}

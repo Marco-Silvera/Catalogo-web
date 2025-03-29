@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { updatePerfume } from "../../actions/perfumes";
+import axios from "axios";
 
 function PerfumeFormEdit({ initialData, onUpdate }) {
     const [formData, setFormData] = useState(initialData || {});
     const [addingUpdate, setAddingUpdate] = useState(false);
+    const [fileKey, setFileKey] = useState(Date.now());
 
     // Función para generar el path automáticamente
     const generatePathFromName = (name) => {
@@ -41,6 +43,104 @@ function PerfumeFormEdit({ initialData, onUpdate }) {
         }
     };
 
+    // Convierte una imagen a formato WebP
+    const convertToWebP = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+
+                    // Convertir a WebP con calidad 0.8 (80%)
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                // Crear un nuevo archivo con extensión .webp
+                                const fileName =
+                                    file.name
+                                        .split(".")
+                                        .slice(0, -1)
+                                        .join(".") || file.name;
+                                const webpFile = new File(
+                                    [blob],
+                                    `${fileName}.webp`,
+                                    {
+                                        type: "image/webp",
+                                        lastModified: new Date().getTime(),
+                                    }
+                                );
+                                resolve(webpFile);
+                            } else {
+                                reject(new Error("Error al convertir a WebP"));
+                            }
+                        },
+                        "image/webp",
+                        0.8
+                    );
+                };
+                img.onerror = () =>
+                    reject(new Error("Error al cargar la imagen"));
+                img.src = event.target.result;
+            };
+            reader.onerror = () =>
+                reject(new Error("Error al leer el archivo"));
+            reader.readAsDataURL(file);
+        });
+    };
+
+    // Sube un archivo a Cloudinary y retorna la URL
+    const uploadToCloudinary = async (file) => {
+        try {
+            // Primero convertimos el archivo a WebP
+            const webpFile = await convertToWebP(file);
+
+            const form = new FormData();
+            form.append("file", webpFile);
+            form.append("upload_preset", "catalogo");
+            form.append("folder", "catalogo_perfumes");
+            // Ya no necesitamos el format=webp porque el archivo ya está en formato WebP
+            // form.append("format", "webp"); <-- Eliminamos esta línea que causaba el error
+
+            const res = await axios.post(
+                "https://api.cloudinary.com/v1_1/dazpe9m9l/image/upload",
+                form
+            );
+            return res.data.secure_url;
+        } catch (error) {
+            console.error("Error procesando o subiendo a Cloudinary", error);
+            return null;
+        }
+    };
+
+    // Maneja la subida de archivo y actualiza formData con la URL resultante
+    const handleFileChange = async (e, fieldName) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setAddingUpdate(true); // Mostrar "Guardando..." o similar mientras sube
+
+        try {
+            const uploadedUrl = await uploadToCloudinary(file);
+
+            if (uploadedUrl) {
+                setFormData((prev) => ({
+                    ...prev,
+                    [fieldName]: uploadedUrl,
+                }));
+            }
+        } catch (error) {
+            console.error("Error al procesar la imagen:", error);
+            alert("Error al procesar la imagen. Intente nuevamente.");
+        } finally {
+            setAddingUpdate(false);
+        }
+    };
+
     // Manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,11 +151,23 @@ function PerfumeFormEdit({ initialData, onUpdate }) {
             // Se asume que updatePerfume retorna el registro actualizado.
             onUpdate(updated);
             setFormData({});
+
+            setFileKey(Date.now());
         } catch (error) {
             console.error(error);
             alert("Error al actualizar el perfume");
         } finally {
             setAddingUpdate(false);
+        }
+    };
+
+    // Función para verificar si la URL es válida y así mostrar preview
+    const isValidUrl = (url) => {
+        try {
+            new URL(url);
+            return true;
+        } catch (e) {
+            return false;
         }
     };
 
@@ -349,6 +461,167 @@ function PerfumeFormEdit({ initialData, onUpdate }) {
                             <div className="flex flex-col gap-2">
                                 <label className="flex flex-col gap-2 items-start w-full font-medium">
                                     Imagen principal
+                                    {/* Input de texto (link) */}
+                                    <input
+                                        type="text"
+                                        name="image"
+                                        value={formData.image || ""}
+                                        onChange={handleChange}
+                                        placeholder="Imagen principal de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    />
+                                </label>
+
+                                {/* "o" */}
+                                <div className="text-center text-sm">ó</div>
+
+                                {/* Input de archivo */}
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "image")
+                                    }
+                                />
+
+                                {/* Vista previa */}
+                                {formData.image &&
+                                    isValidUrl(formData.image) && (
+                                        <img
+                                            src={formData.image}
+                                            alt={`Imagen principal de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                        />
+                                    )}
+                            </div>
+
+                            {/* Segunda imagen */}
+                            <div className="flex flex-col gap-2">
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Segunda imagen
+                                    <input
+                                        type="text"
+                                        name="imagetwo"
+                                        value={formData.imagetwo || ""}
+                                        onChange={handleChange}
+                                        placeholder="Segunda imagen de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    />
+                                </label>
+
+                                <div className="text-center text-sm">ó</div>
+
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "imagetwo")
+                                    }
+                                />
+
+                                {formData.imagetwo &&
+                                    isValidUrl(formData.imagetwo) && (
+                                        <img
+                                            src={formData.imagetwo}
+                                            alt={`Segunda imagen de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                        />
+                                    )}
+                            </div>
+
+                            {/* Tercera imagen */}
+                            <div className="flex flex-col gap-2">
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Tercera imagen
+                                    <input
+                                        type="text"
+                                        name="imagethree"
+                                        value={formData.imagethree || ""}
+                                        onChange={handleChange}
+                                        placeholder="Tercera imagen de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    />
+                                </label>
+
+                                <div className="text-center text-sm">ó</div>
+
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "imagethree")
+                                    }
+                                />
+
+                                {formData.imagethree &&
+                                    isValidUrl(formData.imagethree) && (
+                                        <img
+                                            src={formData.imagethree}
+                                            alt={`Tercera imagen de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                        />
+                                    )}
+                            </div>
+
+                            {/* Cuarta imagen */}
+                            <div className="flex flex-col gap-2">
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Cuarta imagen
+                                    <input
+                                        type="text"
+                                        name="imagefour"
+                                        value={formData.imagefour || ""}
+                                        onChange={handleChange}
+                                        placeholder="Cuarta imagen de perfume"
+                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    />
+                                </label>
+
+                                <div className="text-center text-sm">ó</div>
+
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "imagefour")
+                                    }
+                                />
+
+                                {formData.imagefour &&
+                                    isValidUrl(formData.imagefour) && (
+                                        <img
+                                            src={formData.imagefour}
+                                            alt={`Cuarta imagen de ${formData.name}`}
+                                            className="w-full h-auto aspect-square object-cover rounded-lg"
+                                        />
+                                    )}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                {/* Resto de los campos... */}
+
+                {/* Botón de envío */}
+                <button
+                    disabled={addingUpdate}
+                    className="bg-teal-500 hover:bg-teal-600 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold uppercase transition-transform text-white shadow-sm "
+                >
+                    {addingUpdate ? "Guardando..." : "Guardar cambios"}
+                </button>
+            </form>
+        </section>
+    );
+}
+
+export default PerfumeFormEdit;
+{
+    /* <div className="flex flex-col gap-2">
+                                <label className="flex flex-col gap-2 items-start w-full font-medium">
+                                    Imagen principal
                                     <input
                                         type="text"
                                         name="image"
@@ -427,22 +700,5 @@ function PerfumeFormEdit({ initialData, onUpdate }) {
                                         className="w-full h-auto aspect-square object-cover rounded-lg"
                                     />
                                 )}
-                            </div>
-                        </div>
-                    </section>
-                </div>
-                {/* Resto de los campos... */}
-
-                {/* Botón de envío */}
-                <button
-                    disabled={addingUpdate}
-                    className="bg-teal-500 hover:bg-teal-600 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold uppercase transition-transform text-white shadow-sm "
-                >
-                    {addingUpdate ? "Guardando..." : "Guardar cambios"}
-                </button>
-            </form>
-        </section>
-    );
+                            </div> */
 }
-
-export default PerfumeFormEdit;

@@ -1,5 +1,6 @@
 import { getPerfumeByPath, fetchPerfumesByVersion } from "@/actions/perfumes";
 import PerfumeGallery from "../components/PerfumeGallery";
+import AddToCartButton from "../components/AddToCartButton";
 import Link from "next/link";
 
 // Genera las rutas estáticas para perfumes Sellado
@@ -73,26 +74,12 @@ export default async function PerfumePage({ params }) {
                                 </div>
                             </div>
                         </div>
-                        {/* <div className="self-end flex flex-col gap-5">
+                        <div className="self-end flex flex-col gap-5">
                             <p className="text-xl md:text-2xl lg:text-3xl font-semibold self-end">
                                 S/ {perfume.price}.00
                             </p>
-                            {isPerfumeInCart ? (
-                                <Link
-                                    to="/cart"
-                                    className="bg-green-500 text-white py-2 px-5 rounded-lg hover:bg-green-600 transition"
-                                >
-                                    Agregado al carrito
-                                </Link>
-                            ) : (
-                                <button
-                                    onClick={handleAddToCart}
-                                    className="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition"
-                                >
-                                    Añadir al carrito
-                                </button>
-                            )}
-                        </div> */}
+                            <AddToCartButton product={perfume} />
+                        </div>
                     </div>
                     <p className="text-center text-sm mt-5">
                         Envíos a todo el Perú, más información{" "}

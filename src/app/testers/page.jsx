@@ -50,7 +50,7 @@ function Testers() {
                             <iframe
                                 className="w-fit h-full aspect-[9/17] self-center"
                                 src="https://www.tiktok.com/embed/7302912274224647429"
-                                allowfullscreen
+                                allowFullScreen
                                 scrolling="no"
                                 allow="encrypted-media;"
                             ></iframe>
@@ -73,7 +73,7 @@ function Testers() {
                             <iframe
                                 className="w-fit h-full aspect-[9/17] self-center"
                                 src="https://www.tiktok.com/embed/7218001723300859142"
-                                allowfullscreen
+                                allowFullScreen
                                 scrolling="no"
                                 allow="encrypted-media;"
                             ></iframe>
@@ -95,7 +95,7 @@ function Testers() {
                             <iframe
                                 className="w-fit h-full aspect-[9/17] self-center"
                                 src="https://www.tiktok.com/embed/7216899594570042630"
-                                allowfullscreen
+                                allowFullScreen
                                 scrolling="no"
                                 allow="encrypted-media;"
                             ></iframe>

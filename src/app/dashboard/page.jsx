@@ -23,11 +23,11 @@ import { getDecants } from "@/actions/decants";
 import { getMiniatures } from "@/actions/miniaturas";
 import MiniatureFormEdit from "../components/MiniatureFormEdit";
 import MiniatureTable from "../components/MiniatureTable";
-// import MiniatureFormEdit from "@/components/MiniatureFormEdit";
-// import MiniatureTable from "@/components/MiniatureTable";
 
 export default function Dashboard() {
     const router = useRouter();
+    const [sessionChecked, setSessionChecked] = useState(false);
+    const [session, setSession] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState("perfume");
 
     // Estados para perfumes
@@ -50,17 +50,19 @@ export default function Dashboard() {
     const [selectedMiniature, setSelectedMiniature] = useState(null);
     const [loadingMiniatures, setLoadingMiniatures] = useState(true);
 
-    // Verificar la sesión del usuario al cargar el componente
     useEffect(() => {
         const checkUser = async () => {
             const {
                 data: { session },
             } = await supabase.auth.getSession();
-
             if (!session) {
-                router.push("/login");
+                router.replace("/login"); // Evita el "back" del navegador
+                return;
             }
+            setSession(session);
+            setSessionChecked(true);
         };
+
         checkUser();
     }, [router]);
 
@@ -296,6 +298,73 @@ export default function Dashboard() {
         return categories[selectedCategory] || null;
     };
 
+    if (!sessionChecked) {
+        return (
+            <div className="flex-1 w-10 flex justify-center items-center self-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <circle
+                        fill="#D9D9D9"
+                        stroke="#D9D9D9"
+                        strokeWidth="15"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                    >
+                        <animate
+                            attributeName="cy"
+                            calcMode="spline"
+                            dur="2"
+                            values="65;135;65;"
+                            keySplines=".5 0 .5 1;.5 0 .5 1"
+                            repeatCount="indefinite"
+                            begin="-.4"
+                        ></animate>
+                    </circle>
+                    <circle
+                        fill="#D9D9D9"
+                        stroke="#D9D9D9"
+                        strokeWidth="15"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                    >
+                        <animate
+                            attributeName="cy"
+                            calcMode="spline"
+                            dur="2"
+                            values="65;135;65;"
+                            keySplines=".5 0 .5 1;.5 0 .5 1"
+                            repeatCount="indefinite"
+                            begin="-.2"
+                        ></animate>
+                    </circle>
+                    <circle
+                        fill="#D9D9D9"
+                        stroke="#D9D9D9"
+                        strokeWidth="15"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                    >
+                        <animate
+                            attributeName="cy"
+                            calcMode="spline"
+                            dur="2"
+                            values="65;135;65;"
+                            keySplines=".5 0 .5 1;.5 0 .5 1"
+                            repeatCount="indefinite"
+                            begin="0"
+                        ></animate>
+                    </circle>
+                </svg>
+            </div>
+        ); // O un loading spinner si lo prefieres
+    }
+
+    if (!session) {
+        return null; // Asegura que no se renderiza nada antes de redirigir
+    }
+
     return (
         <section className="mx-auto w-full max-w-[1800px] px-5 pb-10 pt-5 sm:pt-10 flex flex-col gap-5">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase">
@@ -306,7 +375,7 @@ export default function Dashboard() {
                 <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="p-2 border rounded w-full max-w-[328.88px]"
+                    className="p-2 border rounded w-full max-w-[328.88px] outline-none"
                 >
                     <option value="perfume">Perfume</option>
                     <option value="exclusivos">Exclusivos</option>
@@ -315,7 +384,7 @@ export default function Dashboard() {
                 </select>
                 <button
                     onClick={handleLogout}
-                    className="bg-red-500 rounded-lg w-fit py-2 px-5 self-center font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-red-500 hover:text-red-500 text-sm md:text-base"
+                    className="bg-red-500 rounded-lg w-fit py-2 px-5 self-center font-bold uppercase transition-transform text-white shadow-sm hover:bg-red-600 text-sm md:text-base"
                 >
                     Cerrar sesión
                 </button>

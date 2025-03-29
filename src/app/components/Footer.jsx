@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 function Footer() {
     return (
@@ -10,13 +11,15 @@ function Footer() {
                             href="https://github.com/Marco-Silvera"
                             className="flex items-center"
                         >
-                            <img
-                                src="https://pbs.twimg.com/profile_images/1533454803/isotipo_400x400.jpg"
-                                className="h-8 me-3"
+                            <Image
+                                src="/logo_mini.webp"
+                                className="me-3"
+                                height={32}
+                                width={32}
                                 alt="Logo de tienda"
                             />
                             <span className="self-center text-lg md:text-2xl font-semibold whitespace-nowrap">
-                                PU
+                                Marca
                             </span>
                         </a>
                     </div>
@@ -44,12 +47,12 @@ function Footer() {
                 <hr className="my-6 border-gray-200 sm:mx-auto lg:my-8" />
                 <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm text-gray-500 sm:text-center">
-                        © 2024{" "}
+                        © 2025{" "}
                         <a
                             href="https://www.linkedin.com/in/marcosilvera/"
                             className="hover:underline"
                         >
-                            PU
+                            Marca
                         </a>
                         . Todos los derechos reservados.
                     </span>

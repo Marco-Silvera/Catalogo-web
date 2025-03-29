@@ -64,7 +64,7 @@ function Envios() {
                         }
                         target="_blank"
                         rel="noreferrer"
-                        className="bg-[#25D366] rounded-lg w-fit py-2 px-5 self-center font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-[#25D366] hover:text-[#25D366] text-xl flex gap-3 items-center"
+                        className="bg-green-600 rounded-lg w-fit py-2 px-5 font-bold uppercase transition-transform text-white shadow-sm hover:bg-green-700 border text-base sm:text-xl flex gap-3 items-center"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

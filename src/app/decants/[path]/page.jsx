@@ -1,5 +1,6 @@
 import { getDecantByPath, getDecants } from "@/actions/decants";
 import PerfumeGalleryThree from "@/app/components/PerfumeGalleryThree";
+import AddToCartButton from "@/app/components/AddToCartButton";
 import Link from "next/link";
 
 // Función para generar rutas estáticas para exclusivos
@@ -74,6 +75,7 @@ export default async function DecantPage({ params }) {
                                         decant.pricethree}
                                 </li>
                             </ul>
+                            <AddToCartButton product={decant} />
                             {/* {isDecantInCart ? (
                                     <Link
                                         to="/cart"

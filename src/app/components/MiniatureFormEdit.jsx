@@ -376,7 +376,7 @@ function MiniatureFormEdit({ initialData, onUpdate }) {
                 </div>
                 <button
                     disabled={addingUpdate}
-                    className="bg-yellow-500 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-yellow-500 hover:text-yellow-500"
+                    className="bg-teal-500 hover:bg-teal-600 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold uppercase transition-transform text-white shadow-sm"
                     type="submit"
                 >
                     {addingUpdate ? "Guardando..." : "Guardar cambios"}

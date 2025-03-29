@@ -497,7 +497,7 @@ function PerfumeForm({ onAdd }) {
 
                 <button
                     disabled={adding}
-                    className="bg-green-500 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-green-500 hover:text-green-500"
+                    className="bg-green-500 hover:bg-green-600 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold uppercase transition-transform text-white shadow-sm "
                 >
                     {adding ? "Agregando..." : "Agregar"}
                 </button>

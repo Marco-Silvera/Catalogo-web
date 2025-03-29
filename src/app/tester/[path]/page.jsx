@@ -1,5 +1,6 @@
 import { getPerfumeByPath, fetchPerfumesByVersion } from "@/actions/perfumes";
 import PerfumeGallery from "@/app/components/PerfumeGallery";
+import AddToCartButton from "@/app/components/AddToCartButton";
 import Link from "next/link";
 
 // Genera las rutas estáticas para perfumes Tester
@@ -78,6 +79,7 @@ export default async function PerfumeTesterPage({ params }) {
                             <p className="text-xl md:text-2xl lg:text-3xl font-semibold self-end">
                                 S/ {perfume.price}.00
                             </p>
+                            <AddToCartButton product={perfume} />
                             {/* {isPerfumeInCart ? (
                             <Link
                                 to="/cart"

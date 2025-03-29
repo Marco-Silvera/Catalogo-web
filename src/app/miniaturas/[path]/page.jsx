@@ -1,5 +1,6 @@
 import { getMiniatureByPath, getMiniatures } from "@/actions/miniaturas";
 import PerfumeGalleryThree from "@/app/components/PerfumeGalleryThree";
+import AddToCartButton from "@/app/components/AddToCartButton";
 import Link from "next/link";
 
 // Función para generar rutas estáticas para exclusivos
@@ -62,6 +63,12 @@ export default async function MiniaturePage({ params }) {
                             <div className=" bg-gray-100 p-2 rounded text-sm lg:text-base">
                                 {miniature.size + " ml"}
                             </div>
+                        </div>
+                        <div className="self-end flex flex-col gap-5">
+                            <p className="text-xl md:text-2xl lg:text-3xl font-semibold self-end">
+                                S/ {miniature.price}.00
+                            </p>
+                            <AddToCartButton product={miniature} />
                         </div>
                         {/* <div className='self-end flex flex-col gap-5'>
                                 <p className="text-xl md:text-2xl lg:text-3xl font-semibold self-end">S/ {miniature.price}.00</p>

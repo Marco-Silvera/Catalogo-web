@@ -470,9 +470,9 @@ function DecantFormEdit({ initialData, onUpdate }) {
 
                 <button
                     disabled={addingUpdate}
-                    className="bg-green-500 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold hover:scale-95 uppercase transition-transform text-white shadow-sm hover:bg-white border hover:border-green-500 hover:text-green-500"
+                    className="bg-teal-500 hover:bg-teal-600 rounded-lg w-fit py-2 px-5 self-center mt-4 font-bold uppercase transition-transform text-white shadow-sm"
                 >
-                    {addingUpdate ? "Agregando..." : "Agregar"}
+                    {addingUpdate ? "Guardando..." : "Guardar cambios"}
                 </button>
             </form>
         </section>

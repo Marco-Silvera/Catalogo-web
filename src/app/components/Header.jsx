@@ -1,33 +1,37 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabase/client";
+import Link from "next/link";
+import Image from "next/image";
 
 function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para verificar si el usuario está logueado
-    // const navigate = useNavigate();
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 0) {
-                setIsScrolled(true);
-            } else {
-                setIsScrolled(false);
-            }
+            setIsScrolled(window.scrollY > 0);
         };
 
         const checkUser = async () => {
             const {
                 data: { session },
             } = await supabase.auth.getSession();
-            setIsLoggedIn(!!session); // Cambia el estado si el usuario está logueado
+            setIsLoggedIn(!!session);
         };
+
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setIsLoggedIn(!!session);
+            }
+        );
 
         window.addEventListener("scroll", handleScroll);
         checkUser();
 
         return () => {
             window.removeEventListener("scroll", handleScroll);
+            authListener?.subscription?.unsubscribe();
         };
     }, []);
 
@@ -53,93 +57,108 @@ function Header() {
             }`}
         >
             <div className="max-w-[1500px] w-full mx-auto flex justify-between items-center gap-5 md:gap-10 px-5">
-                <a href="/" className="hidden sm:block">
-                    <img
-                        className="h-[50px] hidden sm:block"
-                        src="https://dx23yqi1tewca.cloudfront.net/images/poiLogo/fc88679b-5c1f-4918-8e90-9b053f091b53.jpg"
+                <Link href="/" className="hidden sm:block">
+                    <Image
+                        className="hidden sm:block"
+                        src="/logo.webp"
                         alt="Logo"
+                        height={50}
+                        width={120}
                     />
-                </a>
-                <a href="/" className="block sm:hidden">
-                    <img
-                        className="block h-10 sm:hidden"
-                        src="https://pbs.twimg.com/profile_images/1533454803/isotipo_400x400.jpg"
+                </Link>
+                <Link href="/" className="block sm:hidden">
+                    <Image
+                        className="block sm:hidden"
+                        src="/logo_mini.webp"
                         alt="Logo"
+                        height={40}
+                        width={40}
                     />
-                </a>
-                <div className="flex items-center gap-5 md:gap-10">
+                </Link>
+                <div className="flex items-center gap-5 md:gap-10 relative">
                     <div
                         id="menu"
-                        className="hidden xl:block absolute xl:top-0 right-0 xl:relative top-[70px] bg-white w-full sm:w-96 xl:w-auto"
+                        className="hidden xl:block absolute xl:relative top-[70px] xl:top-0 right-0 bg-white w-64 xl:w-auto rounded-lg shadow-lg xl:shadow-none xl:rounded-none overflow-hidden z-50"
                     >
-                        <ul className="gap-none xl:gap-10 flex flex-col items-center xl:flex-row">
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                        <ul className="gap-none xl:gap-10 flex flex-col items-center xl:flex-row py-3">
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto  last:rounded-b-lg xl:first:rounded-none xl:last:rounded-none">
+                                <Link
                                     href="/"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     Inicio
-                                </a>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
+                                <Link
                                     href="/exclusivos"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     Exclusivos
-                                </a>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
+                                <Link
                                     href="/miniaturas"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     Miniaturas
-                                </a>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
+                                <Link
                                     href="/decants"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     Decants
-                                </a>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
+                                <Link
                                     href="/testers"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     ¿Qué es un perfume tester?
-                                </a>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
+                                <Link
                                     href="/envios"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
                                     Envíos
-                                </a>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-gray-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
+                                <Link
                                     href="/carrito"
                                     className="text-gray-600 hover:text-gray-900 text-base font-medium transition-colors h-full w-ful flex items-center justify-center"
                                 >
-                                    <img
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                         className="h-6"
-                                        src="/carritodecompras.svg"
-                                        alt="Carrito de compras"
-                                    />
-                                </a>
+                                    >
+                                        <circle cx="8" cy="21" r="1" />
+                                        <circle cx="19" cy="21" r="1" />
+                                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                                    </svg>
+                                </Link>
                             </li>
-                            <li className="hover:bg-gray-200 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto">
-                                <a
+                            <li className="hover:bg-blue-50 xl:hover:bg-transparent w-full h-10 xl:w-auto xl:h-auto first:rounded-t-lg xl:first:rounded-none xl:last:rounded-none">
+                                <Link
                                     className="font-medium text-blue-600 dark:text-blue-500 hover:underline h-full w-ful flex items-center justify-center"
                                     href={isLoggedIn ? "/dashboard" : "/login"}
                                 >
                                     {isLoggedIn ? "Dashboard" : "Login"}
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>

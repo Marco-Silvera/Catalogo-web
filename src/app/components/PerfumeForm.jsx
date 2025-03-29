@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import { createPerfume } from "@/actions/perfumes";
+import axios from "axios";
 
 function PerfumeForm({ onAdd }) {
     const [adding, setAdding] = useState(false);
+    const [fileKey, setFileKey] = useState(Date.now());
     const [formData, setFormData] = useState({
         name: "",
         path: "",
@@ -49,12 +51,110 @@ function PerfumeForm({ onAdd }) {
         }
     };
 
+    // Convierte una imagen a formato WebP
+    const convertToWebP = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+
+                    // Convertir a WebP con calidad 0.8 (80%)
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                // Crear un nuevo archivo con extensión .webp
+                                const fileName =
+                                    file.name
+                                        .split(".")
+                                        .slice(0, -1)
+                                        .join(".") || file.name;
+                                const webpFile = new File(
+                                    [blob],
+                                    `${fileName}.webp`,
+                                    {
+                                        type: "image/webp",
+                                        lastModified: new Date().getTime(),
+                                    }
+                                );
+                                resolve(webpFile);
+                            } else {
+                                reject(new Error("Error al convertir a WebP"));
+                            }
+                        },
+                        "image/webp",
+                        0.8
+                    );
+                };
+                img.onerror = () =>
+                    reject(new Error("Error al cargar la imagen"));
+                img.src = event.target.result;
+            };
+            reader.onerror = () =>
+                reject(new Error("Error al leer el archivo"));
+            reader.readAsDataURL(file);
+        });
+    };
+
+    // Sube un archivo a Cloudinary y retorna la URL
+    const uploadToCloudinary = async (file) => {
+        try {
+            // Primero convertimos el archivo a WebP
+            const webpFile = await convertToWebP(file);
+
+            const form = new FormData();
+            form.append("file", webpFile);
+            form.append("upload_preset", "catalogo");
+            form.append("folder", "catalogo_perfumes");
+            form.append("resource_type", "image");
+
+            const res = await axios.post(
+                "https://api.cloudinary.com/v1_1/dazpe9m9l/image/upload",
+                form
+            );
+            return res.data.secure_url; // URL pública de la imagen ya en formato WebP
+        } catch (error) {
+            console.error("Error procesando o subiendo a Cloudinary", error);
+            return null;
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((prevData) => ({
             ...prevData,
             [name]: type === "checkbox" ? checked : value,
         }));
+    };
+
+    // Manejar subida de archivo en uno de los 4 campos de imagen
+    const handleFileChange = async (e, fieldName) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setAdding(true); // Indicamos que está subiendo
+
+        try {
+            const uploadedUrl = await uploadToCloudinary(file);
+
+            if (uploadedUrl) {
+                // Guardamos la URL resultante en formData[fieldName]
+                setFormData((prev) => ({
+                    ...prev,
+                    [fieldName]: uploadedUrl,
+                }));
+            }
+        } catch (error) {
+            console.error("Error al procesar la imagen:", error);
+            alert("Error al procesar la imagen. Intente nuevamente.");
+        } finally {
+            setAdding(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -79,6 +179,7 @@ function PerfumeForm({ onAdd }) {
                 imagethree: "",
                 imagefour: "",
             });
+            setFileKey(Date.now());
         } catch (error) {
             console.error(error);
             alert("Error al agregar el perfume");
@@ -379,115 +480,132 @@ function PerfumeForm({ onAdd }) {
                             Imágenes
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 justify-center">
-                            {/* Imagen principal */}
+                            {/* Repetimos para los 4 campos de imagen */}
+                            {/* 1) Imagen principal */}
                             <div className="flex flex-col gap-2">
-                                <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    Imagen principal
-                                    <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="text"
-                                        name="image"
-                                        placeholder="Imagen principal de perfume"
-                                        onChange={handleChange}
-                                        value={formData.image}
-                                        required
-                                    />
-                                </label>
+                                <span>Imagen principal</span>
 
+                                {/* Input de texto para pegar link */}
+                                <input
+                                    type="text"
+                                    name="image"
+                                    className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    placeholder="URL de imagen"
+                                    value={formData.image}
+                                    onChange={handleChange}
+                                />
+
+                                {/* "o" en el medio */}
+                                <div className="text-center text-sm">ó</div>
+
+                                {/* Input de archivo */}
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "image")
+                                    }
+                                />
+
+                                {/* Vista previa */}
                                 {formData.image &&
                                     isValidUrl(formData.image) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.image}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
+                                        <img
+                                            src={formData.image}
+                                            alt="Vista previa"
+                                            className="w-full h-auto aspect-square object-center object-cover rounded-lg"
+                                        />
                                     )}
                             </div>
 
-                            {/* Segunda imagen */}
+                            {/* 2) Segunda imagen */}
                             <div className="flex flex-col gap-2">
-                                <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    Segunda imagen
-                                    <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="text"
-                                        name="imagetwo"
-                                        placeholder="Segunda imagen"
-                                        onChange={handleChange}
-                                        value={formData.imagetwo}
-                                        required
-                                    />
-                                </label>
-
+                                <span>Segunda imagen</span>
+                                <input
+                                    type="text"
+                                    name="imagetwo"
+                                    className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    placeholder="URL de imagen"
+                                    value={formData.imagetwo}
+                                    onChange={handleChange}
+                                />
+                                <div className="text-center text-sm">ó</div>
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "imagetwo")
+                                    }
+                                />
                                 {formData.imagetwo &&
                                     isValidUrl(formData.imagetwo) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagetwo}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
+                                        <img
+                                            src={formData.imagetwo}
+                                            alt="Vista previa 2"
+                                            className="w-full h-auto aspect-square object-center object-cover rounded-lg"
+                                        />
                                     )}
                             </div>
 
-                            {/* Tercera imagen */}
+                            {/* 3) Tercera imagen */}
                             <div className="flex flex-col gap-2">
-                                <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    Tercera imagen
-                                    <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="text"
-                                        name="imagethree"
-                                        placeholder="Tercera imagen"
-                                        onChange={handleChange}
-                                        value={formData.imagethree}
-                                        required
-                                    />
-                                </label>
-
+                                <span>Tercera imagen</span>
+                                <input
+                                    type="text"
+                                    name="imagethree"
+                                    className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    placeholder="URL de imagen"
+                                    value={formData.imagethree}
+                                    onChange={handleChange}
+                                />
+                                <div className="text-center text-sm">ó</div>
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "imagethree")
+                                    }
+                                />
                                 {formData.imagethree &&
                                     isValidUrl(formData.imagethree) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagethree}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
+                                        <img
+                                            src={formData.imagethree}
+                                            alt="Vista previa 3"
+                                            className="w-full h-auto aspect-square object-center object-cover rounded-lg"
+                                        />
                                     )}
                             </div>
 
-                            {/* Cuarta imagen */}
+                            {/* 4) Cuarta imagen */}
                             <div className="flex flex-col gap-2">
-                                <label className="flex flex-col gap-2 items-start w-full font-medium">
-                                    Cuarta imagen
-                                    <input
-                                        className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
-                                        type="text"
-                                        name="imagefour"
-                                        placeholder="Cuarta imagen"
-                                        onChange={handleChange}
-                                        value={formData.imagefour}
-                                        required
-                                    />
-                                </label>
-
+                                <span>Cuarta imagen</span>
+                                <input
+                                    type="text"
+                                    name="imagefour"
+                                    className="border border-gray-100 p-2 rounded-lg w-full outline-none focus:border-green-600 font-normal"
+                                    placeholder="URL de imagen"
+                                    value={formData.imagefour}
+                                    onChange={handleChange}
+                                />
+                                <div className="text-center text-sm">ó</div>
+                                <input
+                                    key={fileKey}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleFileChange(e, "imagefour")
+                                    }
+                                />
                                 {formData.imagefour &&
                                     isValidUrl(formData.imagefour) && (
-                                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                                            <img
-                                                src={formData.imagefour}
-                                                alt={`Imagen principal de ${formData.name}`}
-                                                className="w-full h-auto aspect-square object-cover rounded-lg"
-                                                loading="lazy"
-                                            />
-                                        </div>
+                                        <img
+                                            src={formData.imagefour}
+                                            alt="Vista previa 4"
+                                            className="w-full h-auto aspect-square object-center object-cover rounded-lg"
+                                        />
                                     )}
                             </div>
                         </div>
